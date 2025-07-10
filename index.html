@@ -146,11 +146,58 @@
         
         // Load the stream
         await player.load(channelstreamInfo.streamUrl);
-        console.log('Stream loaded successfully.');
+        
+console.log('Stream loaded successfully.');
+
+        // Force autoplay with multiple attempts
+        const attemptAutoplay = async () => {
+          try {
+            await video.play();
+            console.log('Autoplay successful');
+          } catch (playError) {
+            console.log('Autoplay blocked, trying with muted audio');
+            video.muted = true;
+            try {
+              await video.play();
+              console.log('Autoplay successful with muted audio');
+            } catch (mutedError) {
+              console.log('Autoplay failed completely, user interaction required');
+            }
+          }
+        };
+
+        // Immediate autoplay attempt
+        if (video.readyState >= 2) {
+          await attemptAutoplay();
+        } else {
+          video.addEventListener('canplay', attemptAutoplay, { once: true });
+        }
+
+      } catch (error) {
+        console.error('Error initializing player:', error);
+        
+        // Fallback to direct video source
+        video.src = channelstreamInfo.streamUrl;
+        video.autoplay = true;
+        video.muted = false;
+        
+        try {
+          await video.play();
+        } catch (fallbackError) {
+          video.muted = true;
+          await video.play();
+        }
+      }
+    }
+        
 
         
-          
-        
-
-        
-</script>
+      
+  // Initialize player when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePlayer().catch(error => {
+        console.error('Error initializing player:', error);
+      });
+    });
+    
+  </script>
