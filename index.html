@@ -32,12 +32,12 @@
 
       .shaka-video-container {
         position: absolute ;
-        width: 100%;height:100%;
-        aspect-ratio: 16/9;
+        width: 100%;height:100%;aspect-ratio: 16/9;
         background-color: #000;
         border-radius: 1px;
         overflow: hidden;
-        box-shadow: 0 4px 2px rgba(0,0,0,0.5);
+        
+        
       }
 
       video {
@@ -85,12 +85,12 @@
 
 
 <div class="video-container">
-<div class="shaka-video-container youtube-theme" data-shaka-player>
+<div class="shaka-video-container youtube-theme" >
     <img src="https://blogger.googleusercontent.com/img/a/AVvXsEiQ92h-ekVYskxW9qCgLvpQVMpAs4tqUQXnH9nDi37JW5B95V7Cq2Rz_mlGO68vTZmA2H5Qp4p8B0I9EUlW-6W1aVOZgITWN3xyE65Hd6G5G_D6HJFxiuXJaK-wMfYD0PiiUR9EBodkzuPH0-ubAMJQK_3F3rpDMEIJKCxlEzNZucpRzsumlBFXWqinGOw=s885" alt="Logo" class="video-watermark">
     <video id="video" autoplay="yes" oncanplay="this.muted=false" poster="https://blogger.googleusercontent.com/img/a/AVvXsEiGqaZeRBZ6Y7yV5ZYSRiNRhBa5q9_EMx7R5TJcHd3XJwwHh2YhNOGt76Y4vEcUIjvIaA7W-Tw1RyMLP-4WZwVHA4mk18zwXl7HdSL5WabprIasDOWJO7jpL0zTQB4p_y7X0Rv0xwe-cJ-GvxofAgeRp2FIiNgB90n_b8Cqw0sAaZqVhJg_fi9UyfSO8KY" playsinline controls>
 
-</video> </div>
-</div>
+</video> 
+</div></div>
 
 
 
@@ -99,10 +99,11 @@
   const queryParams = new URLSearchParams(window.location.search);
         const url = queryParams.get('url');
   
+    
     const channelstreamInfo = {  
-      streamUrl: url,
+      streamUrl: url, 
       authBearer: "",   
-      streamPoster: ""
+      streamPoster: "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1745008895589.png"
     };
 
     let player;
@@ -117,14 +118,14 @@
         // Configure player for better performance
         player.configure({
           streaming: {
-            bufferingGoal: 1,
-            rebufferingGoal:2,
-            bufferBehind: 1
+            bufferingGoal: 10,
+            rebufferingGoal: 2,
+            bufferBehind: 30
           },
           manifest: {
             retryParameters: {
               timeout: 30000,
-              maxAttempts: 3,
+              maxAttempts: 2,
               baseDelay: 1000,
               backoffFactor: 2,
               fuzzFactor: 0.5
@@ -143,7 +144,7 @@
 
         // Set video properties for autoplay
         video.autoplay = true;
-        video.controls = false;
+        video.controls = true;
         video.volume = 1;
         video.muted = false;
         video.preload = 'auto';
@@ -231,4 +232,4 @@
           break;
       }
     });
-      </script>
+</script>
