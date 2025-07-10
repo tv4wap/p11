@@ -103,7 +103,7 @@
     const channelstreamInfo = {  
       streamUrl: url, 
       authBearer: "",   
-      streamPoster: "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1745008895589.png"
+      streamPoster: ""
     };
 
     let player;
@@ -203,33 +203,5 @@
       });
     });
 
-    // Keyboard controls
-    document.addEventListener('keydown', event => {
-      if (!video) return;
 
-      switch (event.code) {
-        case 'Space':
-          event.preventDefault();
-          video.paused ? video.play() : video.pause();
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          video.volume = Math.min(video.volume + 0.1, 1);
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          video.volume = Math.max(video.volume - 0.1, 0);
-          break;
-        case 'KeyF':
-          if (document.fullscreenElement) {
-            document.exitFullscreen();
-          } else {
-            video.requestFullscreen();
-          }
-          break;
-        case 'KeyM':
-          video.muted = !video.muted;
-          break;
-      }
-    });
 </script>
