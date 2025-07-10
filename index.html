@@ -1,1 +1,234 @@
+<head>
+  <meta charset="UTF-8">
+  
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
+  
 
+  <style type="text/css">
+      body {position:absolute;
+        margin: 0;
+        padding: 0px;
+        background-color: #000000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height:100%;width:100%
+      }
+
+      .video-container {
+        position: absolute ;
+        width: 100%;height:100%;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 1px;
+        overflow: hidden;
+        box-shadow: 0 4px 2px rgba(0,0,0,0.5);
+      }
+
+      .shaka-video-container {
+        position: absolute ;
+        width: 100%;height:100%;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 1px;
+        overflow: hidden;
+        box-shadow: 0 4px 2px rgba(0,0,0,0.5);
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        
+      }
+
+      .video-watermark {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 80px;
+        height: 10px;
+        opacity: 0.7;
+        z-index: 1000;
+        pointer-events: none;
+      }
+
+      @media (max-width: 768px) {
+        body {width:100%;height:100%
+          padding: 1px;
+        }
+        
+        .video-container {
+          max-width: 100%;height:100%
+        }
+        
+        .video-watermark {
+          width: 30px;
+          height: 30px;
+          top: 10px;
+          left: 10px;
+        }
+      }
+
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .video-container {
+          max-width: 854px;
+        }
+      }
+  </style>
+</head>
+
+
+<div class="video-container">
+<div class="shaka-video-container youtube-theme" data-shaka-player>
+    <img src="https://blogger.googleusercontent.com/img/a/AVvXsEiQ92h-ekVYskxW9qCgLvpQVMpAs4tqUQXnH9nDi37JW5B95V7Cq2Rz_mlGO68vTZmA2H5Qp4p8B0I9EUlW-6W1aVOZgITWN3xyE65Hd6G5G_D6HJFxiuXJaK-wMfYD0PiiUR9EBodkzuPH0-ubAMJQK_3F3rpDMEIJKCxlEzNZucpRzsumlBFXWqinGOw=s885" alt="Logo" class="video-watermark">
+    <video id="video" autoplay="yes" oncanplay="this.muted=false" poster="https://blogger.googleusercontent.com/img/a/AVvXsEiGqaZeRBZ6Y7yV5ZYSRiNRhBa5q9_EMx7R5TJcHd3XJwwHh2YhNOGt76Y4vEcUIjvIaA7W-Tw1RyMLP-4WZwVHA4mk18zwXl7HdSL5WabprIasDOWJO7jpL0zTQB4p_y7X0Rv0xwe-cJ-GvxofAgeRp2FIiNgB90n_b8Cqw0sAaZqVhJg_fi9UyfSO8KY" playsinline controls>
+
+</video> </div>
+</div>
+
+
+
+<script>
+
+  const queryParams = new URLSearchParams(window.location.search);
+        const url = queryParams.get('url');
+  
+    const channelstreamInfo = {  
+      streamUrl: url,
+      authBearer: "",   
+      streamPoster: ""
+    };
+
+    let player;
+    const video = document.getElementById('video');
+
+    async function initializePlayer() {
+      try {
+        // Initialize Shaka Player first for better HLS support
+        player = new shaka.Player();
+        await player.attach(video);
+
+        // Configure player for better performance
+        player.configure({
+          streaming: {
+            bufferingGoal: 1,
+            rebufferingGoal:2,
+            bufferBehind: 1
+          },
+          manifest: {
+            retryParameters: {
+              timeout: 30000,
+              maxAttempts: 3,
+              baseDelay: 1000,
+              backoffFactor: 2,
+              fuzzFactor: 0.5
+            }
+          }
+        });
+
+        // Set up network adapter for authorization
+        const networkingEngine = player.getNetworkingEngine();
+        networkingEngine.clearAllRequestFilters();
+        networkingEngine.registerRequestFilter((type, request) => {
+          if (channelstreamInfo.authBearer) {
+            request.headers['Authorization'] = `Bearer ${channelstreamInfo.authBearer}`;
+          }
+        });
+
+        // Set video properties for autoplay
+        video.autoplay = true;
+        video.controls = false;
+        video.volume = 1;
+        video.muted = false;
+        video.preload = 'auto';
+
+        console.log(`Loading stream: ${channelstreamInfo.streamUrl}`);
+        
+        // Load the stream
+        await player.load(channelstreamInfo.streamUrl);
+        console.log('Stream loaded successfully.');
+
+        // Force autoplay with multiple attempts
+        const attemptAutoplay = async () => {
+          try {
+            await video.play();
+            console.log('Autoplay successful');
+          } catch (playError) {
+            console.log('Autoplay blocked, trying with muted audio');
+            video.muted = true;
+            try {
+              await video.play();
+              console.log('Autoplay successful with muted audio');
+            } catch (mutedError) {
+              console.log('Autoplay failed completely, user interaction required');
+            }
+          }
+        };
+
+        // Immediate autoplay attempt
+        if (video.readyState >= 2) {
+          await attemptAutoplay();
+        } else {
+          video.addEventListener('canplay', attemptAutoplay, { once: true });
+        }
+
+      } catch (error) {
+        console.error('Error initializing player:', error);
+        
+        // Fallback to direct video source
+        video.src = channelstreamInfo.streamUrl;
+        video.autoplay = true;
+        video.muted = false;
+        
+        try {
+          await video.play();
+        } catch (fallbackError) {
+          video.muted = true;
+          await video.play();
+        }
+      }
+    }
+
+    // Initialize player when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePlayer().catch(error => {
+        console.error('Error initializing player:', error);
+      });
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', event => {
+      if (!video) return;
+
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault();
+          video.paused ? video.play() : video.pause();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          video.volume = Math.min(video.volume + 0.1, 1);
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          video.volume = Math.max(video.volume - 0.1, 0);
+          break;
+        case 'KeyF':
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            video.requestFullscreen();
+          }
+          break;
+        case 'KeyM':
+          video.muted = !video.muted;
+          break;
+      }
+    });
+      </script>
