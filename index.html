@@ -102,7 +102,7 @@
     
     const channelstreamInfo = {  
       streamUrl: url, 
-      authBearer: "",   
+      
       streamPoster: ""
     };
 
@@ -133,14 +133,7 @@
           }
         });
 
-        // Set up network adapter for authorization
-        const networkingEngine = player.getNetworkingEngine();
-        networkingEngine.clearAllRequestFilters();
-        networkingEngine.registerRequestFilter((type, request) => {
-          if (channelstreamInfo.authBearer) {
-            request.headers['Authorization'] = `Bearer ${channelstreamInfo.authBearer}`;
-          }
-        });
+        
 
         // Set video properties for autoplay
         video.autoplay = true;
